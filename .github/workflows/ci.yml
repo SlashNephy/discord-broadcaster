@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: SlashNephy/.github/.github/workflows/go-run.yml@master
+    permissions:
+      contents: 'read'
+    with:
+      command: 'make build'
+
+  lint:
+    uses: SlashNephy/.github/.github/workflows/go-lint.yml@master
+    permissions:
+      contents: 'read'
+      pull-requests: 'write'
+    with:
+      golangci-lint-flags: '--timeout=10m'
+
+  make-generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: make generate
+      - run: git diff --exit-code

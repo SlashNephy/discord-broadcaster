@@ -1,0 +1,25 @@
+name: CD
+
+on:
+  push:
+    branches-ignore:
+      - renovate/**
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: SlashNephy/.github/.github/workflows/docker-build.yml@master
+    permissions:
+      contents: read
+      packages: write
+      actions: read
+      security-events: write
+    with:
+      image-name: ghcr.io/slashnephy/discord-broadcaster
+      image-platforms: linux/amd64
+      dispatch-update-image-digest: true
+    secrets:
+      dispatch-github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
