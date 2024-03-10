@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      target: base
+    command:
+      - make
+      - dev
+    ports:
+      - "8080:8080/tcp"
+    volumes:
+      - source: .
+        target: /app
+        type: bind
+    develop:
+      watch:
+        - action: rebuild
+          path: ./go.mod
+    environment:
+      LOG_LEVEL: debug
+      REDIS_URL: redis://redis:6379/0
+      TOPICS: debug:1216059831677358130
+
+  redis:
+    image: redis:7.2.4-bookworm
+    ports:
+      - "6379:6379/tcp"

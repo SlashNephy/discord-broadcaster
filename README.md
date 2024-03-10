@@ -1,1 +1,1 @@
-# divination-faloop-discord-forwarder
+# discord-broadcaster
