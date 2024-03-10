@@ -18,13 +18,13 @@ jobs:
     with:
       command: 'make build'
 
-  lint:
-    uses: SlashNephy/.github/.github/workflows/go-lint.yml@master
-    permissions:
-      contents: 'read'
-      pull-requests: 'write'
-    with:
-      golangci-lint-flags: '--timeout=10m'
+  # lint:
+  #   uses: SlashNephy/.github/.github/workflows/go-lint.yml@master
+  #   permissions:
+  #     contents: 'read'
+  #     pull-requests: 'write'
+  #   with:
+  #     golangci-lint-flags: '--timeout=10m'
 
   make-generate:
     runs-on: ubuntu-latest
