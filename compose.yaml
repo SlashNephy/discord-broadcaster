@@ -24,6 +24,6 @@ services:
       TOPICS: debug:1216059831677358130
 
   redis:
-    image: redis:7.2.4-bookworm
+    image: redis:7.2.4-bookworm@sha256:e647cfe134bf5e8e74e620f66346f93418acfc240b71dd85640325cb7cd01402
     ports:
       - "6379:6379/tcp"
