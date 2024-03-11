@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Server-Sent Events Demo</title>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+      const topics = ["debug"];
+
+      const url = new URL("http://localhost:8080/events");
+      url.searchParams.set("topics", topics.join(","));
+
+      const source = new EventSource(url);
+      source.addEventListener("open", (event) => {
+        console.log(event);
+      });
+      source.addEventListener("error", (event) => {
+        console.error(event);
+      });
+      source.addEventListener("message", (event) => {
+        const element = document.createElement("li");
+        element.textContent = `${event.type}: ${event.data}`;
+
+        const container = document.getElementById("container");
+        container.appendChild(element);
+      });
+    </script>
+  </body>
+</html>

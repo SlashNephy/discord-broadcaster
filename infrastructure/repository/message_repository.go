@@ -34,9 +34,8 @@ func (r *MessageRepository) PublishMessage(ctx context.Context, message *entity.
 }
 
 func (r *MessageRepository) SubscribeMessage(ctx context.Context, channel chan<- *entity.Message) {
-	subscription := r.redis.Subscribe(ctx, MessageChannel)
-
 	go func() {
+		subscription := r.redis.Subscribe(ctx, MessageChannel)
 		defer subscription.Close()
 
 		for m := range subscription.Channel() {

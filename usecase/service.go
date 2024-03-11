@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"slices"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -33,29 +34,45 @@ func NewService(ctx context.Context, config *Config, store MessageStore, discord
 }
 
 func (s *Service) SubscribeEvent(ctx context.Context, topics mapset.Set[entity.Topic], channel chan<- *entity.EventFrame) {
-	messages := make(chan *entity.Message, 1)
-	s.store.SubscribeMessage(ctx, messages)
-
 	go func() {
+		messages := make(chan *entity.Message, 1)
 		defer close(messages)
+		s.store.SubscribeMessage(ctx, messages)
 
-		for message := range messages {
-			messageTopics := s.DetectTopics(message).Intersect(topics)
-			if messageTopics.IsEmpty() {
-				continue
-			}
-
+		for {
 			select {
 			case <-ctx.Done():
 				return
-			case channel <- &entity.EventFrame{
-				ID:    message.ID,
-				Event: "message",
-				Data: &entity.EventData{
-					Topics:  messageTopics.ToSlice(),
-					Payload: message,
-				},
-			}:
+			case message := <-messages:
+				messageTopics := s.DetectTopics(message).Intersect(topics)
+				if messageTopics.IsEmpty() {
+					continue
+				}
+
+				channel <- &entity.EventFrame{
+					ID:    message.ID,
+					Event: "message",
+					Data: &entity.EventData{
+						Topics:  messageTopics.ToSlice(),
+						Payload: message,
+					},
+				}
+			}
+		}
+	}()
+
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				channel <- &entity.EventFrame{
+					Comment: "keepalive",
+				}
 			}
 		}
 	}()

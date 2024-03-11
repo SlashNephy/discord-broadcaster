@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -11,10 +12,13 @@ import (
 )
 
 func (co *Controller) GetEvents(c echo.Context) error {
-	topics := mapset.NewSet(strings.Split(c.QueryParam("topics"), ",")...)
-	if topics.IsEmpty() {
+	rawTopics := c.QueryParam("topics")
+	if rawTopics == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "No topics specified")
 	}
+
+	topics := mapset.NewSet(strings.Split(rawTopics, ",")...)
+	slog.InfoContext(c.Request().Context(), "connected", slog.Any("topics", topics))
 
 	// write HTTP headers
 	c.Response().Header().Set("Content-Type", "text/event-stream")
@@ -25,18 +29,17 @@ func (co *Controller) GetEvents(c echo.Context) error {
 	defer close(events)
 	co.usecase.SubscribeEvent(c.Request().Context(), topics, events)
 
-	for event := range events {
+	for {
 		select {
 		case <-c.Request().Context().Done():
 			return nil
-		default:
+		case event := <-events:
 			if _, err := c.Response().Write([]byte(event.String())); err != nil {
 				return err
 			}
 
+			slog.DebugContext(c.Request().Context(), "emit", slog.Any("frame", event))
 			c.Response().Flush()
 		}
 	}
-
-	return nil
 }
