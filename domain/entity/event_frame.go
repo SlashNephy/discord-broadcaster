@@ -7,13 +7,14 @@ import (
 )
 
 type EventFrame struct {
-	ID    string
-	Event string
-	Data  *EventData
+	ID      string     `json:"id,omitempty"`
+	Event   string     `json:"event,omitempty"`
+	Data    *EventData `json:"data,omitempty"`
+	Comment string     `json:"comment,omitempty"`
 }
 
 type EventData struct {
-	Topics  []Topic `json:"topics"`
+	Topics  []Topic `json:"topics,omitempty"`
 	Payload any     `json:"payload"`
 }
 
@@ -32,12 +33,15 @@ func (f *EventFrame) String() string {
 		}
 		segments = append(segments, fmt.Sprintf("data: %s", data))
 	}
+	if f.Comment != "" {
+		segments = append(segments, fmt.Sprintf(": %s", f.Comment))
+	}
 
 	if len(segments) == 0 {
 		return ""
 	}
 
-	return strings.Join(segments, "\n") + "\n"
+	return strings.Join(segments, "\n") + "\n\n"
 }
 
 var _ fmt.Stringer = new(EventFrame)
