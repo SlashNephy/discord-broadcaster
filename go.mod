@@ -1,11 +1,12 @@
 module github.com/SlashNephy/discord-broadcaster
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/cosmtrek/air v1.51.0
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/golangci/golangci-lint v1.56.2
 	github.com/google/wire v0.6.0
 	github.com/joho/godotenv v1.5.1
@@ -54,7 +55,6 @@ require (
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
 	github.com/daixiang0/gci v0.12.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/denis-tingaikin/go-header v0.4.3 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
