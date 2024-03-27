@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -47,6 +49,54 @@ func (s *Service) AddMessageCreateHandler(handler usecase.MessageCreateHandler) 
 			slog.Error("failed to handle message create event", slog.Any("error", err))
 		}
 	})
+}
+
+func (s *Service) ExecuteWebhook(ctx context.Context, id, token string, params *discordgo.WebhookParams) error {
+	_, err := s.session.WebhookExecute(id, token, false, params)
+	if err != nil {
+		return fmt.Errorf("failed to execute webhook: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) FindGuild(ctx context.Context, id string) (*discordgo.Guild, error) {
+	guild, err := s.session.State.Guild(id)
+	if err != nil {
+		if errors.Is(err, discordgo.ErrStateNotFound) {
+			return s.session.Guild(id)
+		}
+
+		return nil, err
+	}
+
+	return guild, nil
+}
+
+func (s *Service) FindChannel(ctx context.Context, id string) (*discordgo.Channel, error) {
+	channel, err := s.session.State.Channel(id)
+	if err != nil {
+		if errors.Is(err, discordgo.ErrStateNotFound) {
+			return s.session.Channel(id)
+		}
+
+		return nil, err
+	}
+
+	return channel, nil
+}
+
+func (s *Service) FindGuildMember(ctx context.Context, guildID string, userID string) (*discordgo.Member, error) {
+	member, err := s.session.State.Member(guildID, userID)
+	if err != nil {
+		if errors.Is(err, discordgo.ErrStateNotFound) {
+			return s.session.GuildMember(guildID, userID)
+		}
+
+		return nil, err
+	}
+
+	return member, nil
 }
 
 var _ usecase.DiscordClient = new(Service)

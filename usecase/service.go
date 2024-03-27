@@ -2,11 +2,15 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	mapset "github.com/deckarep/golang-set/v2"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/SlashNephy/discord-broadcaster/domain/entity"
 )
@@ -18,18 +22,31 @@ type Service struct {
 }
 
 type Config struct {
-	Topics map[entity.Topic]string `env:"TOPICS"`
+	Topics          map[entity.Topic]string `env:"TOPICS"`
+	DiscordWebhooks map[entity.Topic]string `env:"DISCORD_WEBHOOKS"`
 }
 
 func NewService(ctx context.Context, config *Config, store MessageStore, discord DiscordClient) *Service {
-	discord.AddMessageCreateHandler(func(event *discordgo.MessageCreate) error {
-		return store.PublishMessage(ctx, event.Message)
-	})
-
-	return &Service{
+	service := &Service{
 		config:  config,
 		store:   store,
 		discord: discord,
+	}
+	discord.AddMessageCreateHandler(service.onMessageCreate(ctx))
+
+	return service
+}
+
+func (s *Service) onMessageCreate(ctx context.Context) func(event *discordgo.MessageCreate) error {
+	return func(event *discordgo.MessageCreate) error {
+		go func() {
+			messageTopics := s.DetectTopics(event.Message)
+			if !messageTopics.IsEmpty() {
+				_ = s.forwardMessage(ctx, event.Message, messageTopics)
+			}
+		}()
+
+		return s.store.PublishMessage(ctx, event.Message)
 	}
 }
 
@@ -76,6 +93,67 @@ func (s *Service) SubscribeEvent(ctx context.Context, topics mapset.Set[entity.T
 			}
 		}
 	}()
+}
+
+func (s *Service) forwardMessage(ctx context.Context, message *discordgo.Message, topics mapset.Set[entity.Topic]) error {
+	guild, err := s.discord.FindGuild(ctx, message.GuildID)
+	if err != nil {
+		return fmt.Errorf("failed to find guild: %w", err)
+	}
+
+	channel, err := s.discord.FindChannel(ctx, message.ChannelID)
+	if err != nil {
+		return fmt.Errorf("failed to find channel: %w", err)
+	}
+
+	member, err := s.discord.FindGuildMember(ctx, message.GuildID, message.Author.ID)
+	if err != nil {
+		return fmt.Errorf("failed to find guild member: %w", err)
+	}
+
+	effectiveMemberName := member.User.Username
+	if member.Nick != "" {
+		effectiveMemberName = member.Nick
+	}
+
+	eg, egCtx := errgroup.WithContext(ctx)
+	for _, topic := range topics.ToSlice() {
+		topic := topic
+		eg.Go(func() error {
+			if webhook, ok := s.config.DiscordWebhooks[topic]; ok {
+				webhookID, token, ok := strings.Cut(webhook, "/")
+				if !ok {
+					return fmt.Errorf("failed to parse webhook URL: %s", webhook)
+				}
+
+				err := s.discord.ExecuteWebhook(egCtx, webhookID, token, &discordgo.WebhookParams{
+					Content:   message.Content,
+					Username:  fmt.Sprintf("%s (%s #%s)", effectiveMemberName, guild.Name, channel.Name),
+					AvatarURL: message.Author.AvatarURL(""),
+					Embeds:    message.Embeds,
+				})
+				if err != nil {
+					slog.ErrorContext(egCtx, "failed to send webhook",
+						slog.String("topic", topic),
+						slog.String("webhook_id", webhookID),
+						slog.Any("message", message),
+						slog.Any("err", err),
+					)
+					return err
+				}
+
+				slog.InfoContext(egCtx, "sent webhook",
+					slog.String("topic", topic),
+					slog.String("webhook_id", webhookID),
+					slog.Any("message", message),
+				)
+			}
+
+			return nil
+		})
+	}
+
+	return eg.Wait()
 }
 
 func (s *Service) DetectTopics(message *entity.Message) mapset.Set[entity.Topic] {

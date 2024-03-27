@@ -17,6 +17,10 @@ type MessageCreateHandler func(event *discordgo.MessageCreate) error
 
 type DiscordClient interface {
 	AddMessageCreateHandler(handler MessageCreateHandler)
+	ExecuteWebhook(ctx context.Context, id, token string, params *discordgo.WebhookParams) error
+	FindGuild(ctx context.Context, id string) (*discordgo.Guild, error)
+	FindChannel(ctx context.Context, id string) (*discordgo.Channel, error)
+	FindGuildMember(ctx context.Context, guildID string, userID string) (*discordgo.Member, error)
 }
 
 type MessageStore interface {

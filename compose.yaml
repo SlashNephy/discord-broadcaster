@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -21,7 +21,6 @@ services:
     environment:
       LOG_LEVEL: debug
       REDIS_URL: redis://redis:6379/0
-      TOPICS: debug:1216059831677358130
 
   redis:
     image: redis:7.2.4-bookworm@sha256:3134997edb04277814aa51a4175a588d45eb4299272f8eff2307bbf8b39e4d43
