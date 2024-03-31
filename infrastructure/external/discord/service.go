@@ -26,7 +26,7 @@ func NewService(config *Config) (*Service, error) {
 	}
 
 	discord.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.1059 Chrome/108.0.5359.215 Electron/22.3.26 Safari/537.36"
-	discord.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsMessageContent
+	discord.Identify.Intents = discordgo.IntentsAll
 
 	discord.AddHandler(func(_ *discordgo.Session, r *discordgo.Ready) {
 		slog.Info("Connected to Discord")

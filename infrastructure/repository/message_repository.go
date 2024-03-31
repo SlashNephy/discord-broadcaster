@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/redis/go-redis/v9"
 
@@ -41,6 +42,7 @@ func (r *MessageRepository) SubscribeMessage(ctx context.Context, channel chan<-
 		for m := range subscription.Channel() {
 			var message entity.Message
 			if err := json.Unmarshal([]byte(m.Payload), &message); err != nil {
+				slog.WarnContext(ctx, "failed to unmarshal message", slog.String("payload", m.Payload))
 				continue
 			}
 

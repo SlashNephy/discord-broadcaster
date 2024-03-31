@@ -40,7 +40,7 @@ func NewService(ctx context.Context, config *Config, store MessageStore, discord
 func (s *Service) onMessageCreate(ctx context.Context) func(event *discordgo.MessageCreate) error {
 	return func(event *discordgo.MessageCreate) error {
 		go func() {
-			messageTopics := s.DetectTopics(event.Message)
+			messageTopics := s.DetectMessageTopics(event.Message)
 			if !messageTopics.IsEmpty() {
 				_ = s.forwardMessage(ctx, event.Message, messageTopics)
 			}
@@ -61,7 +61,7 @@ func (s *Service) SubscribeEvent(ctx context.Context, topics mapset.Set[entity.T
 			case <-ctx.Done():
 				return
 			case message := <-messages:
-				messageTopics := s.DetectTopics(message).Intersect(topics)
+				messageTopics := s.DetectMessageTopics(message).Intersect(topics)
 				if messageTopics.IsEmpty() {
 					continue
 				}
@@ -79,7 +79,7 @@ func (s *Service) SubscribeEvent(ctx context.Context, topics mapset.Set[entity.T
 	}()
 
 	go func() {
-		ticker := time.NewTicker(5 * time.Second)
+		ticker := time.NewTicker(15 * time.Second)
 		defer ticker.Stop()
 
 		for {
@@ -156,15 +156,23 @@ func (s *Service) forwardMessage(ctx context.Context, message *discordgo.Message
 	return eg.Wait()
 }
 
-func (s *Service) DetectTopics(message *entity.Message) mapset.Set[entity.Topic] {
-	topics := mapset.NewSet[entity.Topic]()
-	for topic, channelID := range s.config.Topics {
-		if message.ChannelID == channelID {
-			topics.Add(topic)
-		}
-	}
+func (s *Service) ListTopics() map[entity.Topic][]string {
+	topics := map[entity.Topic][]string{}
 
 	for topic, channelIDs := range entity.TopicChannelIDs {
+		topics[topic] = channelIDs
+	}
+
+	for topic, channelID := range s.config.Topics {
+		topics[topic] = []string{channelID}
+	}
+
+	return topics
+}
+
+func (s *Service) DetectMessageTopics(message *entity.Message) mapset.Set[entity.Topic] {
+	topics := mapset.NewSet[entity.Topic]()
+	for topic, channelIDs := range s.ListTopics() {
 		if slices.Contains(channelIDs, message.ChannelID) {
 			topics.Add(topic)
 		}
