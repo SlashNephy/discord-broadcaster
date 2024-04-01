@@ -3,7 +3,7 @@ module github.com/SlashNephy/discord-broadcaster
 go 1.22.1
 
 require (
-	github.com/bwmarrin/discordgo v0.27.1
+	github.com/bwmarrin/discordgo v0.28.1
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/cosmtrek/air v1.51.0
 	github.com/deckarep/golang-set/v2 v2.6.0
