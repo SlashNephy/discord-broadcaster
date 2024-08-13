@@ -23,6 +23,6 @@ services:
       REDIS_URL: redis://redis:6379/0
 
   redis:
-    image: redis:7.4.0-bookworm@sha256:8688f3f542abe29135d07246380f8573f387aa6dc29aa8fa24508e73c5f13384
+    image: redis:7.4.0-bookworm@sha256:5d434317c873086669bf10332f4d4084820431ae2e017a91ea675bf65f49e54f
     ports:
       - "6379:6379/tcp"
