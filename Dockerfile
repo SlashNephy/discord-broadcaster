@@ -1,4 +1,4 @@
-FROM golang:1.22.6-bookworm@sha256:f020456572fc292e9627b3fb435c6de5dfb8020fbcef1fd7b65dd092c0ac56bb AS base
+FROM golang:1.23.0-bookworm@sha256:31dc846dd1bcca84d2fa231bcd16c09ff271bcc1a5ae2c48ff10f13b039688f3 AS base
 WORKDIR /app
 
 COPY ./go.mod ./go.sum ./
@@ -9,7 +9,7 @@ FROM base AS build
 COPY ./ ./
 RUN make build -j
 
-FROM golang:1.22.6-bookworm@sha256:f020456572fc292e9627b3fb435c6de5dfb8020fbcef1fd7b65dd092c0ac56bb
+FROM golang:1.23.0-bookworm@sha256:31dc846dd1bcca84d2fa231bcd16c09ff271bcc1a5ae2c48ff10f13b039688f3
 WORKDIR /app
 
 COPY --from=build /app/server /app/
