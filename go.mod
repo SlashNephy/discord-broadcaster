@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/caarlos0/env/v10 v10.0.0
+	github.com/caarlos0/env/v11 v11.3.0
 	github.com/cosmtrek/air v1.52.1
 	github.com/deckarep/golang-set/v2 v2.7.0
 	github.com/golangci/golangci-lint v1.62.2
