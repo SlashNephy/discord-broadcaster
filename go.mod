@@ -8,7 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/cosmtrek/air v1.52.1
-	github.com/deckarep/golang-set/v2 v2.7.0
+	github.com/deckarep/golang-set/v2 v2.8.0
 	github.com/golangci/golangci-lint v1.64.7
 	github.com/google/wire v0.6.0
 	github.com/joho/godotenv v1.5.1
