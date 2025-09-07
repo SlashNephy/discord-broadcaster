@@ -1,6 +1,6 @@
 module github.com/SlashNephy/discord-broadcaster
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.25.1
 
@@ -14,7 +14,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/redis/go-redis/v9 v9.13.0
-	golang.org/x/sync v0.16.0
+	golang.org/x/sync v0.17.0
 )
 
 require (
