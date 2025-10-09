@@ -6,7 +6,7 @@ toolchain go1.25.1
 
 require (
 	github.com/bwmarrin/discordgo v0.29.0
-	github.com/caarlos0/env/v10 v10.0.0
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/cosmtrek/air v1.52.1
 	github.com/deckarep/golang-set/v2 v2.8.0
 	github.com/golangci/golangci-lint v1.64.8
