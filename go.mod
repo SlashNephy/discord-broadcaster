@@ -9,7 +9,7 @@ require (
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/cosmtrek/air v1.52.1
 	github.com/deckarep/golang-set/v2 v2.8.0
-	github.com/golangci/golangci-lint v1.64.8
+	github.com/golangci/golangci-lint/v2 v2.7.2
 	github.com/google/wire v0.7.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.4
